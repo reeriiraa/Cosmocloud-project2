@@ -1,63 +1,112 @@
+import React, { useState, useRef, useEffect } from 'react'
+import Swal from 'sweetalert2';
 
-import React, { useState } from 'react';
+function AddEmployee({ employees, setEmployees, setIsAdding }) {
 
-const AddEmployee = ({ onAdd, onCancel }) => {
-  const [name, setName] = useState('');
-  const [empId, setEmpId] = useState('');
-  const [address, setAddress] = useState({
-    line1: '',
-    city: '',
-    country: '',
-    zipCode: '',
-  });
-  const [contactMethods, setContactMethods] = useState([
-    { contactMethod: 'EMAIL', value: '' },
-    { contactMethod: 'PHONE', value: '' },
-  ]);
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [email, setEmail] = useState('');
+    const [salary, setSalary] = useState('');
+    const [date, setDate] = useState('');
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    onAdd({
-      name,
-      empId,
-      address,
-      contactMethods,
-    });
-  };
+    const textInput = useRef(null);
 
-  return (
-    <form onSubmit={handleSubmit}>
-      <label>
-        Name:
-        <input type="text" value={name} onChange={(event) => setName(event.target.value)} />
-      </label>
-      <label>
-        Address:
-        <input type="text" value={address.line1} onChange={(event) => setAddress({ ...address, line1: event.target.value })} />
-        <input type="text" value={address.city} onChange={(event) => setAddress({ ...address, city: event.target.value })} />
-        <input type="text" value={address.country} onChange={(event) => setAddress({ ...address, country: event.target.value })} />
-        <input type="text" value={address.zipCode} onChange={(event) => setAddress({ ...address, zipCode: event.target.value })} />
-      </label>
-      <label>
-        Contact Methods:
-        {contactMethods.map((contactMethod, index) => (
-          <div key={index}>
-            <select value={contactMethod.contactMethod} onChange={(event) => setContactMethods([
-              ...contactMethods.slice(0, index),
-              { ...contactMethod, contactMethod: event.target.value },
-              ...contactMethods.slice(index + 1),
-            ])}>
-              <option value="EMAIL">EMAIL</option>
-              <option value="PHONE">PHONE</option>
-            </select>
-            <input type="text" value={contactMethod.value} onChange={(event) => setContactMethods([
-              ...contactMethods.slice(0, index),
-              { ...contactMethod, value: event.target.value },
-              ...contactMethods.slice(index + 1),
-            ])} />
-          </div>
-        ))}
-        </label>
-    </form>
-    )};     
-    export default AddEmployee;
+    useEffect(() => {
+        textInput.current.focus();
+    }, [])
+
+    const handleAdd = e => {
+        e.preventDefault();
+        if (!firstName || !lastName || !email || !salary || !date) {
+            return Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: 'All fields are required.',
+                showConfirmButton: true
+            });
+        }
+
+        const id = employees.length + 1;
+        const newEmployee = {
+            id,
+            firstName,
+            lastName,
+            email,
+            salary,
+            date
+        }
+        employees.push(newEmployee);
+        setEmployees(employees);
+        setIsAdding(false);
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Added!',
+            text: `${firstName} ${lastName}'s data has been Added.`,
+            showConfirmButton: false,
+            timer: 1500
+        });
+    }
+
+
+    return (
+        <div className="small-container">
+            <form onSubmit={handleAdd}>
+                <h1>Add Employee</h1>
+                <label htmlFor="firstName">First Name</label>
+                <input
+                    id="firstName"
+                    type="text"
+                    ref={textInput}
+                    name="firstName"
+                    value={firstName}
+                    onChange={e => setFirstName(e.target.value)}
+                />
+                <label htmlFor="lastName">Last Name</label>
+                <input
+                    id="lastName"
+                    type="text"
+                    name="lastName"
+                    value={lastName}
+                    onChange={e => setLastName(e.target.value)}
+                />
+                <label htmlFor="email">Email</label>
+                <input
+                    id="email"
+                    type="email"
+                    name="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                />
+                <label htmlFor="salary">Salary ($)</label>
+                <input
+                    id="salary"
+                    type="number"
+                    name="salary"
+                    value={salary}
+                    onChange={e => setSalary(e.target.value)}
+                />
+                <label htmlFor="date">Date</label>
+                <input
+                    id="date"
+                    type="date"
+                    name="date"
+                    value={date}
+                    onChange={e => setDate(e.target.value)}
+                />
+                <div style={{ marginTop: '30px' }}>
+                    <input type="submit" value="Add" />
+                    <input
+                        style={{ marginLeft: '12px' }}
+                        className="muted-button"
+                        type="button"
+                        value="Cancel"
+                        onClick={() => setIsAdding(false)}
+                    />
+                </div>
+            </form>
+        </div>
+    );
+}
+
+export default AddEmployee
